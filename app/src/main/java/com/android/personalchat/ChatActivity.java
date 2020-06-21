@@ -1,5 +1,6 @@
 package com.android.personalchat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -42,16 +43,16 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView msgRV;
     private ImageButton add_item, msg_send;
     private EditText msg_text;
-    private String hisid, hisname, his_thumb, online, myid;
+    private String hisid, hisname, his_thumb, online, myid,thumb;
     private Toolbar toolbar;
     private LinearLayoutManager linearLayoutManager;
     private DatabaseReference rootRef;
+
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
     private ArrayList<MessageModel> arrayList = new ArrayList<>();
     private MessageAdapter messageAdapter;
     private int currentPage = 1;
-    private int itemPos = 0;
     private String LastKey = "";
 
     @Override
@@ -103,16 +104,60 @@ public class ChatActivity extends AppCompatActivity {
                 msg_text.setText("");
             }
         });
+        profile_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),UserDetailsActivity.class)
+                .putExtra("id",hisid)
+                );
+            }
+        });
         LoadMessage();
+        //LoadMessage2();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                currentPage++;
-                itemPos = 0;
                 LoadMoreMessage();
             }
         });
     }
+
+    private void LoadMessage2() {
+        rootRef.child("Messages").child(myid).child(hisid);
+        rootRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                arrayList.clear();
+                MessageModel messageModel = dataSnapshot.getValue(MessageModel.class);
+                arrayList.add(messageModel);
+
+                messageAdapter = new MessageAdapter(getApplicationContext(), arrayList, thumb);
+
+                msgRV.setAdapter(messageAdapter);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
     private void LoadMoreMessage() {
         DatabaseReference messageref = rootRef.child("Messages").child(myid).child(hisid);
@@ -121,12 +166,11 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 MessageModel messageModel = dataSnapshot.getValue(MessageModel.class);
-                if (itemPos == 1) {
-                    LastKey = dataSnapshot.getKey();
-                }
-                arrayList.add(itemPos++, messageModel);
+                arrayList.add(messageModel);
                 messageAdapter.notifyDataSetChanged();
                 msgRV.scrollToPosition(arrayList.size() - 1);
+                messageAdapter = new MessageAdapter(getApplicationContext(), arrayList, his_thumb);
+                msgRV.setAdapter(messageAdapter);
                 swipeRefreshLayout.setRefreshing(false);
             }
 
@@ -159,15 +203,18 @@ public class ChatActivity extends AppCompatActivity {
         messageQ.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                MessageModel messageModel = dataSnapshot.getValue(MessageModel.class);
-                itemPos++;
-                if (itemPos == 1) {
-                    LastKey = dataSnapshot.getKey();
+                if (dataSnapshot.hasChildren()){
+                    MessageModel messageModel = dataSnapshot.getValue(MessageModel.class);
+                    arrayList.add(messageModel);
+                    // messageAdapter.notifyDataSetChanged();
+                    msgRV.scrollToPosition(arrayList.size() - 1);
+
+                    messageAdapter = new MessageAdapter(getApplicationContext(), arrayList, thumb);
+
+                    msgRV.setAdapter(messageAdapter);
+                    swipeRefreshLayout.setRefreshing(false);
                 }
-                arrayList.add(messageModel);
-                messageAdapter.notifyDataSetChanged();
-                msgRV.scrollToPosition(arrayList.size() - 1);
-                swipeRefreshLayout.setRefreshing(false);
+
             }
 
             @Override
@@ -241,20 +288,36 @@ public class ChatActivity extends AppCompatActivity {
         linearLayoutManager.setSmoothScrollbarEnabled(true);
         linearLayoutManager.setStackFromEnd(true);
         msgRV.setLayoutManager(linearLayoutManager);
-        messageAdapter = new MessageAdapter(getApplicationContext(), arrayList);
-        msgRV.setAdapter(messageAdapter);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(hisid);
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                thumb = dataSnapshot.child("thumb_image").getValue().toString();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        ShowData();
+    }
+
+    private void ShowData() {
         if (firebaseUser != null) {
             rootRef.child("Users").child(hisid).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     hisname = dataSnapshot.child("name").getValue().toString();
                     his_thumb = dataSnapshot.child("thumb_image").getValue().toString();
+                    //itemPos = dataSnapshot.child("profile_image").getValue().toString();
                     online = dataSnapshot.child("online_status").getValue().toString();
                     name.setText(hisname);
                     Picasso.get().load(his_thumb).placeholder(R.drawable.ic_launcher_background).into(profile_image);
@@ -277,4 +340,5 @@ public class ChatActivity extends AppCompatActivity {
 
         }
     }
+
 }

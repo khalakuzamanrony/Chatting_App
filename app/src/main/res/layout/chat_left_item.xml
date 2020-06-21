@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/all_rl"
     android:layout_width="300dp"
-    android:padding="8dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="8dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
-    android:layout_width="30dp"
-    android:layout_height="30dp"
-    android:layout_centerVertical="true"
-    android:src="@mipmap/ic_launcher"
-    android:id="@+id/c_image"/>
+        android:id="@+id/c_image"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_centerVertical="false"
+        android:layout_marginTop="5dp"
+        android:src="@mipmap/ic_launcher" />
+
     <TextView
+        android:id="@+id/c_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Simple Message"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
-        android:padding="8dp"
-        android:background="@drawable/chat_bg_left"
-        android:id="@+id/c_message"
         android:layout_marginLeft="5dp"
-        android:layout_toRightOf="@+id/c_image"/>
+        android:layout_toRightOf="@+id/c_image"
+        android:background="@drawable/chat_bg_left"
+        android:padding="8dp"
+        android:text="Simple Message"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
 
     <LinearLayout
         android:id="@+id/info"
@@ -38,7 +40,8 @@
             android:layout_weight="1"
             android:gravity="left"
             android:text="12.00pm"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:visibility="gone" />
 
     </LinearLayout>
 

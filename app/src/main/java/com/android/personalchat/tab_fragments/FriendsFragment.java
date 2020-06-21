@@ -1,9 +1,11 @@
 package com.android.personalchat.tab_fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 
 public class FriendsFragment extends Fragment {
     private RecyclerView recyclerView;
+    private TextView friendsCount;
     private Friends_Adapter friends_adapter;
     private ArrayList<Friends_Model> arrayList = new ArrayList<>();
     private FirebaseUser firebaseUser;
@@ -34,11 +37,14 @@ public class FriendsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         recyclerView = view.findViewById(R.id.friends_RV);
+        friendsCount = view.findViewById(R.id.total_friend_count);
+
         recyclerView.setHasFixedSize(true);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         myid = firebaseUser.getUid();
         root = FirebaseDatabase.getInstance().getReference();
         databaseReference = FirebaseDatabase.getInstance().getReference("Friends");
+
         return view;
     }
 
@@ -50,14 +56,18 @@ public class FriendsFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 arrayList.clear();
                 if (dataSnapshot.hasChildren()) {
+
                     for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
 
                         Friends_Model friends_model = dataSnapshot1.getValue(Friends_Model.class);
                         if (friends_model.getSender().equals(myid)) {
                             arrayList.add(friends_model);
+
                         }
 
                     }
+
+                    friendsCount.setText("Total Friends "+arrayList.size());
                     friends_adapter = new Friends_Adapter(arrayList, getContext());
                     recyclerView.setAdapter(friends_adapter);
                 }
