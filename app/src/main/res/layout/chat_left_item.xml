@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:padding="8dp"
+    android:layout_height="wrap_content">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+    android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:layout_centerVertical="true"
+    android:src="@mipmap/ic_launcher"
+    android:id="@+id/c_image"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Simple Message"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:padding="8dp"
+        android:background="@drawable/chat_bg_left"
+        android:id="@+id/c_message"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@+id/c_image"/>
+
+    <LinearLayout
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/c_message"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/c_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_weight="1"
+            android:gravity="left"
+            android:text="12.00pm"
+            android:textStyle="italic" />
+
+    </LinearLayout>
+
+</RelativeLayout>

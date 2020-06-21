@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "281502725412",
+    "firebase_url": "https://personalchat-fba4b.firebaseio.com",
+    "project_id": "personalchat-fba4b",
+    "storage_bucket": "personalchat-fba4b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281502725412:android:985d8a5ca5b3817dbaefb1",
+        "android_client_info": {
+          "package_name": "com.android.personalchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "281502725412-63qdt2nsma7lgurq1rv82rbv69m99q86.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.personalchat",
+            "certificate_hash": "e9f66a994517b2d1b53276ea292776f453f9ba91"
+          }
+        },
+        {
+          "client_id": "281502725412-ruk3uk9vf07eg19d9j7dhan73btla1ag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLDgSbIWqLAoltW5Vg-mEQSR0HFW26hHk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "281502725412-ruk3uk9vf07eg19d9j7dhan73btla1ag.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

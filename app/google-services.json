@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "11830151494",
+    "firebase_url": "https://personalchat-e2fa0.firebaseio.com",
+    "project_id": "personalchat-e2fa0",
+    "storage_bucket": "personalchat-e2fa0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11830151494:android:e974a3dd98bca564a83d47",
+        "android_client_info": {
+          "package_name": "com.android.personalchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "11830151494-2erok4n5peud9jvubio3ce8ks21v1hlq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsNt6u7DNG9w_qk6epoQ3xGpxubbr06v8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "11830151494-2erok4n5peud9jvubio3ce8ks21v1hlq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
