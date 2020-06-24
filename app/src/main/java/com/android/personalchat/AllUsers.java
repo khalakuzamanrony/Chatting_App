@@ -78,8 +78,6 @@ public class AllUsers extends AppCompatActivity {
                 arrayList.clear();
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     AllUserModel allUserModel = dataSnapshot1.getValue(AllUserModel.class);
-                    Log.d("HIS", allUserModel.getId());
-                    Log.d("MINE", myId);
                     if (!allUserModel.getId().equals(myId)) {
                         arrayList.add(allUserModel);
                     }

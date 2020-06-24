@@ -323,12 +323,17 @@ public class ChatActivity extends AppCompatActivity {
                     Picasso.get().load(his_thumb).placeholder(R.drawable.ic_launcher_background).into(profile_image);
                     if (online.equals("online")) {
                         online_status.setText("Online");
-                    } /*else {
+                    }
+                    else {
+                        online_status.setText("Offline");
+                    }
+                        /*else {
 
                         long time = Long.parseLong(online);
                         String lastSeen = GetTime.getTimeAgo(time, getApplicationContext());
                         online_status.setText(lastSeen);
                     }*/
+                    
 
                 }
 

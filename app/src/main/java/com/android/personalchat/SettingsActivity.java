@@ -86,11 +86,11 @@ public class SettingsActivity extends AppCompatActivity {
                 adb.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String te = text.getText().toString();
+                        String newBio = text.getText().toString();
                         String userID2 = firebaseUser.getUid();
                         DatabaseReference databaseReference2 = FirebaseDatabase.getInstance().getReference("Users").child(userID2);
                         Map map = new HashMap();
-                        map.put("status", te);
+                        map.put("status", newBio);
 
                         databaseReference2.updateChildren(map);
                     }

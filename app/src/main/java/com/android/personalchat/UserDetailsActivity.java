@@ -196,7 +196,12 @@ public class UserDetailsActivity extends AppCompatActivity {
         if (current_req_status.equals("not_friend")) {
             Map requestMap = new HashMap();
             requestMap.put("Friend_Requests/" + myid.getUid() + "/" + hisid + "/" + "request_type", "sent");
+            requestMap.put("Friend_Requests/" + myid.getUid() + "/" + hisid + "/" + "he", hisid);
+            requestMap.put("Friend_Requests/" + myid.getUid() + "/" + hisid + "/" + "me", myid.getUid());
             requestMap.put("Friend_Requests/" + hisid + "/" + myid.getUid() + "/" + "request_type", "received");
+            requestMap.put("Friend_Requests/" + hisid + "/" + myid.getUid() + "/" + "he", myid.getUid());
+            requestMap.put("Friend_Requests/" + hisid + "/" + myid.getUid() + "/" + "me", hisid);
+
             rootREF.updateChildren(requestMap, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
@@ -224,7 +229,8 @@ public class UserDetailsActivity extends AppCompatActivity {
             });
 
 
-        }   // ---- ACCEPT REQUEST --------
+        }
+        // ---- ACCEPT REQUEST --------
         if (current_req_status.equals("req_received")) {
             final String date = DateFormat.getDateTimeInstance().format(new Date());
             Map acceptR = new HashMap();

@@ -24,6 +24,7 @@ public class Offline extends Application {
         super.onCreate();
         //--------TEXT
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         //------PICASSO 4 PICTURE
         Picasso.Builder pb = new Picasso.Builder(Offline.this);
@@ -42,7 +43,7 @@ public class Offline extends Application {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null) {
-                        //databaseReference.child("online_status").onDisconnect().setValue(ServerValue.TIMESTAMP);
+                        databaseReference.child("online_status").onDisconnect().setValue("offline");
                         databaseReference.child("online_status").onDisconnect().setValue("offline");
 
 
