@@ -62,14 +62,19 @@ public class ChatActivity extends AppCompatActivity {
         hisid = getIntent().getStringExtra("hisid");
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
-        myid = firebaseUser.getUid();
+        if (firebaseUser!=null)
+        {
+            myid = firebaseUser.getUid();
+            rootRef = FirebaseDatabase.getInstance().getReference();
+        }
+
         toolbar = findViewById(R.id.message_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
         init();
         name.setText(hisname);
-        rootRef = FirebaseDatabase.getInstance().getReference();
+
 
         rootRef.child("Chats").child(myid).addValueEventListener(new ValueEventListener() {
             @Override
@@ -307,7 +312,28 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        ShowData();
+        if (firebaseUser!=null)
+        {
+            ShowData();
+            rootRef.child("Users").child(firebaseUser.getUid()).child("online_status").setValue("online");
+            rootRef.child("Users").child(firebaseUser.getUid()).child("online").setValue("online");
+        }
+        else {
+            startActivity(new Intent(getApplicationContext(), StartActivity.class));
+            finish();
+        }
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (firebaseUser!=null)
+        {
+            ShowData();
+            rootRef.child("Users").child(firebaseUser.getUid()).child("online_status").setValue("online");
+            rootRef.child("Users").child(firebaseUser.getUid()).child("online").setValue("online");
+        }
     }
 
     private void ShowData() {
@@ -319,13 +345,20 @@ public class ChatActivity extends AppCompatActivity {
                     his_thumb = dataSnapshot.child("thumb_image").getValue().toString();
                     //itemPos = dataSnapshot.child("profile_image").getValue().toString();
                     online = dataSnapshot.child("online_status").getValue().toString();
+                    String newOnline =dataSnapshot.child("online").getValue().toString();
+
                     name.setText(hisname);
+
                     Picasso.get().load(his_thumb).placeholder(R.drawable.ic_launcher_background).into(profile_image);
-                    if (online.equals("online")) {
+
+                    if (newOnline.equals("online")) {
                         online_status.setText("Online");
                     }
                     else {
-                        online_status.setText("Offline");
+                        //online_status.setText("Offline");
+                        long time = Long.parseLong(newOnline);
+                        String lastSeen = GetTime.getTimeAgo(time, getApplicationContext());
+                        online_status.setText(lastSeen);
                     }
                         /*else {
 

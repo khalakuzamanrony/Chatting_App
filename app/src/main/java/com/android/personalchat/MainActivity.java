@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 
 import java.util.ArrayList;
 
@@ -66,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
         } else {
             databaseReference.child(firebaseUser.getUid()).child("online_status").setValue("online");
+            databaseReference.child(firebaseUser.getUid()).child("online").setValue("online");
         }
     }
 
@@ -73,8 +73,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (firebaseUser != null) {
-
+            String currentTime = String.valueOf(System.currentTimeMillis());
             databaseReference.child(firebaseUser.getUid()).child("online_status").setValue("offline");
+            databaseReference.child(firebaseUser.getUid()).child("online").setValue(String.valueOf(System.currentTimeMillis()));
 
         }
     }
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.logout) {
             mAuth.signOut();
             databaseReference.child(firebaseUser.getUid()).child("online_status").setValue("offline");
+            databaseReference.child(firebaseUser.getUid()).child("online").setValue(String.valueOf(System.currentTimeMillis()));
             startActivity(new Intent(getApplicationContext(), StartActivity.class));
             finish();
         } else if (item.getItemId() == R.id.ac_settings) {

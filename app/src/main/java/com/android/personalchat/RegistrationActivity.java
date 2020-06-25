@@ -112,6 +112,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     userDetails.put("thumb_image", "default");
                     userDetails.put("id", userID);
                     userDetails.put("online_status", "offline");
+                    userDetails.put("online", "online");
                     databaseReference.child(userID).setValue(userDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -167,6 +168,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         userDetails.put("thumb_image", "default");
                         userDetails.put("id", userID);
                         userDetails.put("online_status", "offline");
+                        userDetails.put("online", "online");
                         databaseReference.child(userID).setValue(userDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {

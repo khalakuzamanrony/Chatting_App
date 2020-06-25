@@ -44,7 +44,7 @@ public class Offline extends Application {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null) {
                         databaseReference.child("online_status").onDisconnect().setValue("offline");
-                        databaseReference.child("online_status").onDisconnect().setValue("offline");
+                        databaseReference.child("online").onDisconnect().setValue(String.valueOf(System.currentTimeMillis()));
 
 
                     }

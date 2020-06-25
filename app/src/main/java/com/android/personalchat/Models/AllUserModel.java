@@ -1,22 +1,21 @@
 package com.android.personalchat.Models;
 
 public class AllUserModel {
-    String name, status, profile_image, thumb_image, id,online_status;
+    String name, status, profile_image, thumb_image, id,online_status,online;
     //long online_status;
 
     public AllUserModel() {
     }
 
-    public AllUserModel(String name, String status, String profile_image, String thumb_image, String id, String online_status) {
+    public AllUserModel(String name, String status, String profile_image, String thumb_image, String id, String online_status, String online) {
         this.name = name;
         this.status = status;
         this.profile_image = profile_image;
         this.thumb_image = thumb_image;
         this.id = id;
         this.online_status = online_status;
+        this.online = online;
     }
-
-
 
     public String getName() {
         return name;
@@ -58,4 +57,19 @@ public class AllUserModel {
         this.id = id;
     }
 
+    public String getOnline_status() {
+        return online_status;
+    }
+
+    public void setOnline_status(String online_status) {
+        this.online_status = online_status;
+    }
+
+    public String getOnline() {
+        return online;
+    }
+
+    public void setOnline(String online) {
+        this.online = online;
+    }
 }
