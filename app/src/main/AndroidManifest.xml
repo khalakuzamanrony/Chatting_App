@@ -13,7 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Reset_PasswordActivity"></activity>
+        <activity
+            android:name=".Blog.New_BlogActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".Reset_PasswordActivity" />
         <activity
             android:name=".ChatActivity"
             android:parentActivityName=".MainActivity" />

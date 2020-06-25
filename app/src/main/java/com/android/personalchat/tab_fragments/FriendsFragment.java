@@ -1,7 +1,6 @@
 package com.android.personalchat.tab_fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +37,14 @@ public class FriendsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         recyclerView = view.findViewById(R.id.friends_RV);
         friendsCount = view.findViewById(R.id.total_friend_count);
-
-        recyclerView.setHasFixedSize(true);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        myid = firebaseUser.getUid();
-        root = FirebaseDatabase.getInstance().getReference();
-        databaseReference = FirebaseDatabase.getInstance().getReference("Friends");
+        recyclerView.setHasFixedSize(true);
+        if (firebaseUser != null) {
+            myid = firebaseUser.getUid();
+            root = FirebaseDatabase.getInstance().getReference();
+            databaseReference = FirebaseDatabase.getInstance().getReference("Friends");
+        }
+
 
         return view;
     }
@@ -67,7 +68,7 @@ public class FriendsFragment extends Fragment {
 
                     }
 
-                    friendsCount.setText("Total Friends "+arrayList.size());
+                    friendsCount.setText("Total Friends " + arrayList.size());
                     friends_adapter = new Friends_Adapter(arrayList, getContext());
                     recyclerView.setAdapter(friends_adapter);
                 }
