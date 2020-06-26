@@ -1,12 +1,12 @@
 package com.android.personalchat.Models;
 
-public  class BlogModel extends PostId {
+public class Blog2Model {
     String id,image,text,time;
 
-    public BlogModel() {
+    public Blog2Model() {
     }
 
-    public BlogModel(String id, String image, String text, String time) {
+    public Blog2Model(String id, String image, String text, String time) {
         this.id = id;
         this.image = image;
         this.text = text;

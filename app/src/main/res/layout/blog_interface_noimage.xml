@@ -32,10 +32,10 @@
             android:layout_below="@id/blog_user_image"
             android:layout_marginLeft="35dp"
             android:layout_marginTop="-25dp"
-            android:src="@drawable/ic_launcher_background"
-            android:visibility="invisible"
+            app:civ_border_width="1dp"
             app:civ_border_color="@android:color/black"
-            app:civ_border_width="1dp" />
+            android:src="@drawable/ic_launcher_background"
+            android:visibility="invisible" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -73,17 +73,91 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="7dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/blog_post_caption"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="This is Simple Caption"
+                    android:layout_marginBottom="3dp"
                     android:textIsSelectable="true"
-                    android:selectAllOnFocus="true"
-                    android:textSize="17sp" />
+                    android:textSize="17sp"
+                    tools:text="This is Simple Caption" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:weightSum="3">
+
+                <TextView
+                    android:id="@+id/like_counter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:text="0 Likes"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 Comments"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:id="@+id/textView6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 Shares"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <ImageButton
+                    android:id="@+id/like_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+
+                    android:background="@color/fui_transparent"
+                    app:srcCompat="@drawable/ic_like" />
+
+                <ImageButton
+                    android:id="@+id/comment_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@color/fui_transparent"
+                    app:srcCompat="@drawable/ic_comment" />
+
+                <ImageButton
+                    android:id="@+id/share_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@color/fui_transparent"
+                    app:srcCompat="@drawable/ic_share" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

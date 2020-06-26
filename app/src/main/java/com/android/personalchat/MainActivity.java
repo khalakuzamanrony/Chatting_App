@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.android.personalchat.tab_fragments.Blog2Fragment;
 import com.android.personalchat.tab_fragments.BlogFragment;
 import com.android.personalchat.tab_fragments.FriendsFragment;
 import com.android.personalchat.tab_fragments.RequestFragment;
@@ -50,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         ViewPager viewPager = findViewById(R.id.view_pager);
         ViewpagerAdapter viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager());
-        viewpagerAdapter.AddFra(new BlogFragment(), "Chats");
+        
+        viewpagerAdapter.AddFra(new Blog2Fragment(), "Blog");
+        viewpagerAdapter.AddFra(new BlogFragment(), "Blogs");
         viewpagerAdapter.AddFra(new RequestFragment(), "Request");
         viewpagerAdapter.AddFra(new FriendsFragment(), "Friends");
         viewPager.setAdapter(viewpagerAdapter);
