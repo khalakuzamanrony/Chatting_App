@@ -3,4 +3,5 @@
     <color name="colorPrimary">#00EA27</color>
     <color name="colorPrimaryDark">#009A1A</color>
     <color name="colorAccent">#03DAC5</color>
+    <color name="blog_text">#807676</color>
 </resources>

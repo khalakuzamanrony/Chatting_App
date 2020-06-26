@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,15 +17,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.android.personalchat.MainActivity;
 import com.android.personalchat.R;
-import com.android.personalchat.SettingsActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -33,7 +35,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
+import java.util.HashMap;
 
 import id.zelory.compressor.Compressor;
 
@@ -46,21 +48,22 @@ public class New_BlogActivity extends AppCompatActivity {
     private Uri mainImageUri, imageUri;
     private ProgressDialog progressDialog;
     private byte[] blogImageData;
-    private String imagename,myid;
+    private String imagename, myid;
     private StorageReference blogImgRef;
     private DatabaseReference rootRef;
     private FirebaseUser firebaseUser;
+    private FirebaseFirestore blogFireStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new__blog);
-        firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser!=null)
-        {
-            blogImgRef= FirebaseStorage.getInstance().getReference();
-            rootRef= FirebaseDatabase.getInstance().getReference();
-            myid=firebaseUser.getUid();
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            blogImgRef = FirebaseStorage.getInstance().getReference();
+            rootRef = FirebaseDatabase.getInstance().getReference();
+            blogFireStore = FirebaseFirestore.getInstance();
+            myid = firebaseUser.getUid();
         }
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -81,33 +84,78 @@ public class New_BlogActivity extends AppCompatActivity {
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressDialog = new ProgressDialog(New_BlogActivity.this);
-                progressDialog.setTitle("Upload");
-                progressDialog.setMessage("Uploading Photo");
-                progressDialog.setCanceledOnTouchOutside(false);
-                progressDialog.show();
-                imagename= rootRef.push().getKey();
-                final StorageReference path=blogImgRef.child("Blog_Images").child(myid).child(imagename+".jpg");
-                path.putBytes(blogImageData).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful())
-                        {
-                           path.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Uri> task) {
-                                    String imgURL=task.getResult().toString();
-                                    Log.d("URL",imgURL);
+                final String blogText = caption.getText().toString().trim();
+                if (!TextUtils.isEmpty(blogText)) {
+                    progressDialog = new ProgressDialog(New_BlogActivity.this);
+                    progressDialog.setTitle("Post");
+                    progressDialog.setMessage("Posting....");
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    progressDialog.show();
+
+                    //PrepareImageToUpload
+                    if (blogImageData == null) {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("id", myid);
+                        hashMap.put("image", "noimage");
+                        hashMap.put("text", blogText);
+                        hashMap.put("time", String.valueOf(System.currentTimeMillis()));
+                        blogFireStore.collection("Blogs").add(hashMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if (task.isSuccessful()) {
+                                    startActivity(new Intent(getApplicationContext(), MainActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                    finish();
                                     progressDialog.dismiss();
+                                } else {
+                                    Log.d("ERROR", task.getException().getMessage());
+                                    progressDialog.hide();
                                 }
-                            });
-                        }
-                        else {
-                            Log.d("ERROR",task.getException().getMessage());
-                            progressDialog.hide();
-                        }
+                            }
+                        });
+
+                    } else {
+                        imagename = rootRef.push().getKey();
+                        final StorageReference path = blogImgRef.child("Blog_Images").child(myid).child(imagename + ".jpg");
+                        path.putBytes(blogImageData).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    path.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Uri> task) {
+                                            final String imgURL = task.getResult().toString();
+                                            HashMap<String, Object> hashMap = new HashMap<>();
+                                            hashMap.put("id", myid);
+                                            hashMap.put("image", imgURL);
+                                            hashMap.put("text", blogText);
+                                            hashMap.put("time", String.valueOf(System.currentTimeMillis()));
+                                            blogFireStore.collection("Blogs").add(hashMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<DocumentReference> task) {
+                                                    if (task.isSuccessful()) {
+                                                        startActivity(new Intent(getApplicationContext(), MainActivity.class)
+                                                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                                        finish();
+                                                        Log.d("URL", imgURL);
+                                                        progressDialog.dismiss();
+                                                    } else {
+                                                        Log.d("ERROR", task.getException().getMessage());
+                                                        progressDialog.hide();
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    Log.d("ERROR", task.getException().getMessage());
+                                }
+                            }
+                        });
                     }
-                });
+
+
+                }
             }
         });
     }
@@ -136,13 +184,13 @@ public class New_BlogActivity extends AppCompatActivity {
                 final File profile_pic_file = new File(imageUri.getPath());
                 try {
                     Bitmap blog_pic = new Compressor(New_BlogActivity.this)
-                            .setMaxHeight(400)
-                            .setMaxWidth(400)
-                            .setQuality(10)
+                            .setMaxHeight(400)//400
+                            .setMaxWidth(400)//400
+                            .setQuality(75)
                             .compressToBitmap(profile_pic_file);
 
                     ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
-                    blog_pic.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayInputStream);
+                    blog_pic.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayInputStream);
                     blogImageData = byteArrayInputStream.toByteArray();
                     image.setImageBitmap(blog_pic);
                 } catch (IOException e) {

@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -19,9 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -49,7 +47,7 @@ import id.zelory.compressor.Compressor;
 
 public class SettingsActivity extends AppCompatActivity {
     private static final int IMG_REQ = 1;
-    StorageTask storageTask;
+   private String profileLink,thumLink;
     private Toolbar toolbar;
     private CircleImageView imageView;
     private TextView name, bio;
@@ -181,6 +179,8 @@ public class SettingsActivity extends AppCompatActivity {
                 resultUri = result.getUri();
                 String imagename = firebaseUser.getUid();
                 final File profile_pic_file = new File(resultUri.getPath());
+
+                //Profile
                 try {
                     Bitmap profile_pic = new Compressor(SettingsActivity.this)
                             .setMaxHeight(400)
@@ -194,83 +194,71 @@ public class SettingsActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                //Thumbnails
+                final File thumb_file = new File(resultUri.getPath());
+                try {
+                    Bitmap thumb = new Compressor(SettingsActivity.this)
+                            .setMaxHeight(50)
+                            .setMaxWidth(50)
+                            .setQuality(75)
+                            .compressToBitmap(thumb_file);
 
+                    ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
+                    thumb.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayInputStream);
+                    thumb_data = byteArrayInputStream.toByteArray();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //Putting values to Storage and Obtain Download Url
                 final StorageReference filePath = storageReference.child("Profile_Images").child(imagename + ".jpg");
                 final StorageReference thumb_path = storageReference.child("Profile_Images").child("thumb").child(imagename + ".jpg");
-                storageTask = filePath.putBytes(profile_pic_data);
-                storageTask.continueWithTask(new Continuation() {
+                thumb_path.putBytes(thumb_data).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
-                    public Object then(@NonNull Task task) throws Exception {
-                        if (!task.isSuccessful()) {
-                            throw task.getException();
-                        }
-                        return filePath.getDownloadUrl();
-                    }
-                }).addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            progressDialog.dismiss();
-                            Uri d = (Uri) task.getResult();
-                            final String u = d.toString();
-                            DatabaseReference databaseReference1 = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
-                            Map map = new HashMap();
-                            map.put("profile_image", u);
-                            databaseReference1.updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful())
+                        {
+                            thumb_path.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
-                                public void onComplete(@NonNull Task task) {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(getApplicationContext(), "Uploaded", Toast.LENGTH_SHORT).show();
-                                        //Thumbnails
-                                        final File thumb_file = new File(resultUri.getPath());
-                                        try {
-                                            Bitmap thumb = new Compressor(SettingsActivity.this)
-                                                    .setMaxHeight(50)
-                                                    .setMaxWidth(50)
-                                                    .setQuality(75)
-                                                    .compressToBitmap(thumb_file);
-
-                                            ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
-                                            thumb.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayInputStream);
-                                            thumb_data = byteArrayInputStream.toByteArray();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        StorageTask storageTask1 = thumb_path.putBytes(thumb_data);
-                                        storageTask1.continueWithTask(new Continuation() {
-                                            @Override
-                                            public Object then(@NonNull Task task) throws Exception {
-                                                if (!task.isSuccessful()) {
-                                                    throw task.getException();
-                                                }
-                                                return thumb_path.getDownloadUrl();
-                                            }
-                                        }).addOnCompleteListener(new OnCompleteListener() {
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    thumLink=task.getResult().toString();
+                                }
+                            });
+                        }
+                    }
+                });
+                filePath.putBytes(profile_pic_data).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            filePath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    if (task.isSuccessful())
+                                    {
+                                         profileLink = task.getResult().toString();
+                                        DatabaseReference databaseReference1 = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+                                        Map map = new HashMap();
+                                        map.put("profile_image", profileLink);
+                                        map.put("thumb_image", thumLink);
+                                        databaseReference1.updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
                                             @Override
                                             public void onComplete(@NonNull Task task) {
-                                                if (task.isSuccessful()) {
+                                                if (task.isSuccessful())
+                                                {
+                                                    Toast.makeText(getApplicationContext(),"Uploaded!",Toast.LENGTH_LONG).show();
                                                     progressDialog.dismiss();
-                                                    Uri thumb_uri = (Uri) task.getResult();
-                                                    final String thumb_url = thumb_uri.toString();
-                                                    DatabaseReference databaseReference2 = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
-                                                    Map map2 = new HashMap();
-                                                    map2.put("thumb_image", thumb_url);
-                                                    databaseReference2.updateChildren(map2);
                                                 }
                                             }
                                         });
+
                                     }
                                 }
                             });
                         }
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.hide();
-                        Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_SHORT).show();
-                    }
                 });
+
+
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();

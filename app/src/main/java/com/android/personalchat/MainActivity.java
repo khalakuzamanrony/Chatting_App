@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (firebaseUser != null) {
-            String currentTime = String.valueOf(System.currentTimeMillis());
             databaseReference.child(firebaseUser.getUid()).child("online_status").setValue("offline");
             databaseReference.child(firebaseUser.getUid()).child("online").setValue(String.valueOf(System.currentTimeMillis()));
 
@@ -92,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             mAuth.signOut();
             databaseReference.child(firebaseUser.getUid()).child("online_status").setValue("offline");
             databaseReference.child(firebaseUser.getUid()).child("online").setValue(String.valueOf(System.currentTimeMillis()));
+            firebaseUser=null;
             startActivity(new Intent(getApplicationContext(), StartActivity.class));
             finish();
         } else if (item.getItemId() == R.id.ac_settings) {

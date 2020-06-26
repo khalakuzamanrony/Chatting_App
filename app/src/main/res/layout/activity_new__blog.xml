@@ -27,31 +27,53 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <ImageView
         android:id="@+id/new_image"
         android:layout_width="0dp"
-        android:layout_height="400dp"
-        android:scaleType="fitCenter"
+        android:layout_height="250dp"
+        android:scaleType="centerInside"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include6"
+        android:adjustViewBounds="true"
         app:srcCompat="@drawable/avater" />
 
-    <EditText
-        android:id="@+id/new_caption"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="13dp"
-        android:layout_marginRight="10dp"
-        android:background="@android:color/transparent"
-        android:ems="10"
-        android:hint="Caption"
-        android:inputType="textPersonName"
-        android:padding="15dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/new_post_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/new_image" />
+        app:layout_constraintTop_toBottomOf="@+id/new_image">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="5dp">
+
+            <EditText
+                android:id="@+id/new_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="13dp"
+                android:layout_marginRight="10dp"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:gravity="start|top|left"
+                android:hint="Caption"
+                android:inputType="textMultiLine|textCapSentences|textImeMultiLine"
+                android:padding="8dp"
+                android:scrollbars="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/new_image" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
