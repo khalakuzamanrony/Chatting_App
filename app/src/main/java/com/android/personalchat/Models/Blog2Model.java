@@ -1,16 +1,17 @@
 package com.android.personalchat.Models;
 
 public class Blog2Model {
-    String id,image,text,time;
+    String id,image,text,time,post_id;
 
     public Blog2Model() {
     }
 
-    public Blog2Model(String id, String image, String text, String time) {
+    public Blog2Model(String id, String image, String text, String time, String post_id) {
         this.id = id;
         this.image = image;
         this.text = text;
         this.time = time;
+        this.post_id = post_id;
     }
 
     public String getId() {
@@ -43,5 +44,13 @@ public class Blog2Model {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getPost_id() {
+        return post_id;
+    }
+
+    public void setPost_id(String post_id) {
+        this.post_id = post_id;
     }
 }

@@ -60,6 +60,7 @@ public class Blog2Activity extends AppCompatActivity {
             blogImgRef = FirebaseStorage.getInstance().getReference();
             rootRef = FirebaseDatabase.getInstance().getReference();
             myid = firebaseUser.getUid();
+
         }
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -82,6 +83,7 @@ public class Blog2Activity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final String blogText = caption.getText().toString().trim();
+                final String timeStamp=String.valueOf(System.currentTimeMillis());
                 if (!TextUtils.isEmpty(blogText)) {
                     progressDialog = new ProgressDialog(Blog2Activity.this);
                     progressDialog.setTitle("Post");
@@ -95,10 +97,10 @@ public class Blog2Activity extends AppCompatActivity {
                         hashMap.put("id", myid);
                         hashMap.put("image", "noimage");
                         hashMap.put("text", blogText);
-                        hashMap.put("time", String.valueOf(System.currentTimeMillis()));
-                        DatabaseReference msgPush = rootRef.child("Blogs").child(myid).push();
-                        String pushKey = msgPush.getKey();
-                        rootRef.child("Blogs").child(pushKey).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        hashMap.put("post_id",timeStamp);
+                        hashMap.put("time", timeStamp);
+
+                        rootRef.child("Blogs").child(timeStamp).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
@@ -115,7 +117,7 @@ public class Blog2Activity extends AppCompatActivity {
 
                     } else {
                         imagename = rootRef.push().getKey();
-                        final StorageReference path = blogImgRef.child("Blog2_Images").child(myid).child(imagename + ".jpg");
+                        final StorageReference path = blogImgRef.child("Blog2_Images").child(timeStamp).child(imagename + ".jpg");
                         path.putBytes(blogImageData).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -128,17 +130,15 @@ public class Blog2Activity extends AppCompatActivity {
                                             hashMap.put("id", myid);
                                             hashMap.put("image", imgURL);
                                             hashMap.put("text", blogText);
-                                            hashMap.put("time", String.valueOf(System.currentTimeMillis()));
-                                            DatabaseReference msgPush = rootRef.child("Blogs").child(myid).push();
-                                            String pushKey = msgPush.getKey();
-                                            rootRef.child("Blogs").child(pushKey).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            hashMap.put("post_id", timeStamp);
+                                            hashMap.put("time", timeStamp);
+
+                                            rootRef.child("Blogs").child(timeStamp).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
-                                                        startActivity(new Intent(getApplicationContext(), MainActivity.class)
-                                                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                                        startActivity(new Intent(getApplicationContext(), MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                                                         finish();
-                                                        Log.d("URL", imgURL);
                                                         progressDialog.dismiss();
                                                     } else {
                                                         Log.d("ERROR", task.getException().getMessage());
@@ -175,7 +175,6 @@ public class Blog2Activity extends AppCompatActivity {
             CropImage.activity(mainImageUri)
                     .setAspectRatio(1, 1)
                     .start(this);
-
         }
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);

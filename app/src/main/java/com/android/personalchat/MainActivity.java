@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         ViewpagerAdapter viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager());
         
         viewpagerAdapter.AddFra(new Blog2Fragment(), "Blog");
-        viewpagerAdapter.AddFra(new BlogFragment(), "Blogs");
+       // viewpagerAdapter.AddFra(new BlogFragment(), "Blogs");
         viewpagerAdapter.AddFra(new RequestFragment(), "Request");
         viewpagerAdapter.AddFra(new FriendsFragment(), "Friends");
         viewPager.setAdapter(viewpagerAdapter);

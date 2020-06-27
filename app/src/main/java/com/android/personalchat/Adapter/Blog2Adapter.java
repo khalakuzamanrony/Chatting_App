@@ -1,12 +1,18 @@
 package com.android.personalchat.Adapter;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,13 +20,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.personalchat.GetTime;
 import com.android.personalchat.Models.Blog2Model;
 import com.android.personalchat.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -33,7 +44,9 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
     private Context context;
     private ArrayList<Blog2Model> arrayList;
     private FirebaseUser firebaseUser;
+    private String myid;
     private DatabaseReference databaseReference;
+    private ProgressDialog progressDialog;
 
     public Blog2Adapter(Context context, ArrayList<Blog2Model> arrayList) {
         this.context = context;
@@ -47,6 +60,7 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+            myid=firebaseUser.getUid();
             databaseReference.keepSynced(true);
         }
         return new Blog2Adapter.ViewHolder(view);
@@ -119,6 +133,121 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
 
             }
         });
+        holder.likeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        holder.commentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        holder.shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Toast.makeText(context,""+blog2Model.getPost_id(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //-----MORE MENU  --------.//
+        holder.more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(context, holder.more, Gravity.END);
+                if (blog2Model.getId().equals(myid)){
+                    popupMenu.getMenu().add(Menu.NONE, 0, 0, "Edit");
+                    popupMenu.getMenu().add(Menu.NONE, 1, 0, "Delete");
+                }else {
+                    popupMenu.getMenu().add(Menu.NONE, 2, 0, "Save ");
+                    popupMenu.getMenu().add(Menu.NONE, 3, 0, "Send Friend Request");
+                }
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int id=item.getItemId();
+                      if (id==0)
+                      {
+
+                      } else if (id == 1) {
+
+                          DeletePost(blog2Model.getPost_id(),blog2Model.getImage());
+                      }
+                        return false;
+                    }
+                });
+
+                popupMenu.show();
+            }
+
+        });
+    }
+
+    private void DeletePost(final String post_id, String image) {
+        if (image.equals("noimage"))
+        {
+
+            progressDialog=new ProgressDialog(context);
+            progressDialog.setTitle("Delete");
+            progressDialog.setMessage("Deleteing...");
+            progressDialog.show();
+            Query query=FirebaseDatabase.getInstance().getReference("Blogs").orderByChild("post_id").equalTo(post_id);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren())
+                    {
+                        dataSnapshot1.getRef().removeValue();
+
+                    }
+
+                    Toast.makeText(context,"Successfully Deleted",Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }else {
+            progressDialog=new ProgressDialog(context);
+            progressDialog.setTitle("Delete");
+            progressDialog.setMessage("Deleteing...");
+            progressDialog.show();
+            StorageReference storageReference= FirebaseStorage.getInstance().getReferenceFromUrl(image);
+            //Deleting image
+            storageReference.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful())
+                    {
+                        Query query=FirebaseDatabase.getInstance().getReference("Blogs").orderByChild("post_id").equalTo(post_id);
+                        query.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren())
+                                {
+                                    dataSnapshot1.getRef().removeValue();
+
+                                }
+
+                                Toast.makeText(context,"Successfully Deleted",Toast.LENGTH_SHORT).show();
+                                progressDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -130,7 +259,7 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
         private CircleImageView userImage, onlineDot;
         private TextView userName, postDate, postCaption, like_counter, comment_counter, share_counter;
         private ImageView postImage;
-        private ImageButton likeButton, commentButton, shareButton;
+        private ImageButton likeButton, commentButton, shareButton, more;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -148,6 +277,7 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
             likeButton = itemView.findViewById(R.id.like_button);
             commentButton = itemView.findViewById(R.id.comment_button);
             shareButton = itemView.findViewById(R.id.share_button);
+            more = itemView.findViewById(R.id.blog_more);
 
         }
     }
