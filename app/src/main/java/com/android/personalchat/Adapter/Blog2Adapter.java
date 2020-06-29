@@ -47,6 +47,8 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
     private String myid;
     private DatabaseReference databaseReference;
     private ProgressDialog progressDialog;
+    public static final int IMAGE = 0;
+    public static final int NO_IMAGE = 1;
 
     public Blog2Adapter(Context context, ArrayList<Blog2Model> arrayList) {
         this.context = context;
@@ -56,14 +58,19 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
     @NonNull
     @Override
     public Blog2Adapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.blog_interface, parent, false);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             databaseReference = FirebaseDatabase.getInstance().getReference("Users");
             myid=firebaseUser.getUid();
             databaseReference.keepSynced(true);
         }
-        return new Blog2Adapter.ViewHolder(view);
+        if (viewType == NO_IMAGE) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.blog_interface_noimage, parent, false);
+            return new Blog2Adapter.ViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.blog_interface, parent, false);
+            return new Blog2Adapter.ViewHolder(view);
+        }
     }
 
     @Override
@@ -88,9 +95,6 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
                     Picasso.get().load(blog2Model.getImage()).placeholder(R.drawable.ic_launcher_background).into(holder.postImage);
                 }
             });
-        } else {
-            holder.postImage.setVisibility(View.GONE);
-            //if you dont want to use viewType you just can use this logic...
         }
 
 
@@ -133,22 +137,27 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
 
             }
         });
+
+        //------LIKE-------//
         holder.likeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
+
+        //------COMMENT-------//
         holder.commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
+
+        //------SHARE-------//
         holder.shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Toast.makeText(context,""+blog2Model.getPost_id(),Toast.LENGTH_SHORT).show();
             }
         });
@@ -280,5 +289,17 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
             more = itemView.findViewById(R.id.blog_more);
 
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (firebaseUser != null) {
+            if (arrayList.get(position).getImage().equals("noimage")) {
+                return NO_IMAGE;
+            } else {
+                return IMAGE;
+            }
+        }
+        return 0;
     }
 }
