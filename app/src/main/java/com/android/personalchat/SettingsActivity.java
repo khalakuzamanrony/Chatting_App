@@ -6,10 +6,16 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +35,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
@@ -47,24 +52,31 @@ import id.zelory.compressor.Compressor;
 
 public class SettingsActivity extends AppCompatActivity {
     private static final int IMG_REQ = 1;
-   private String profileLink,thumLink;
+    private static final int IMG_REQ2 = 2;
+    private Button pro, cov;
+    private String profileLink, thumLink, myid;
     private Toolbar toolbar;
-    private CircleImageView imageView;
+    private ImageView coverImage;
+    private CircleImageView imageView, addImage;
     private TextView name, bio;
-    private ImageButton bio_edit;
+    private ImageButton bio_edit, add_cover;
     private FirebaseUser firebaseUser;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
     private ProgressDialog progressDialog;
     private byte[] thumb_data, profile_pic_data;
-    private Uri resultUri;
+    private Uri resultUri, imageUri, coverUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        storageReference = FirebaseStorage.getInstance().getReference();
+        if (firebaseUser != null) {
+            storageReference = FirebaseStorage.getInstance().getReference();
+            myid = firebaseUser.getUid();
+        }
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -85,8 +97,8 @@ public class SettingsActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String newBio = text.getText().toString();
-                        String userID2 = firebaseUser.getUid();
-                        DatabaseReference databaseReference2 = FirebaseDatabase.getInstance().getReference("Users").child(userID2);
+
+                        DatabaseReference databaseReference2 = FirebaseDatabase.getInstance().getReference("Users").child(myid);
                         Map map = new HashMap();
                         map.put("status", newBio);
 
@@ -96,7 +108,7 @@ public class SettingsActivity extends AppCompatActivity {
                 adb.create().show();
             }
         });
-        imageView.setOnClickListener(new View.OnClickListener() {
+        addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent getImage = new Intent();
@@ -108,14 +120,91 @@ public class SettingsActivity extends AppCompatActivity {
                         .start(SettingsActivity.this);*/
             }
         });
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseReference databaseReference1 = FirebaseDatabase.getInstance().getReference("Users").child(myid);
+                databaseReference1.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        String link = dataSnapshot.child("profile_image").getValue().toString();
+                        startActivity(new Intent(getApplicationContext(), FullViewImageActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .putExtra("imagelink", link));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+            }
+        });
+        add_cover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(getApplicationContext(), add_cover, Gravity.END);
+                popupMenu.getMenu().add(Menu.NONE, 0, 0, "Add Cover Photo");
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == 0) {
+                            AddCover();
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
+            }
+        });
+/*        coverImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final DatabaseReference databaseReference1 = FirebaseDatabase.getInstance().getReference("Users").child(myid);
+                databaseReference1.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.hasChildren()) {
+                            String link = dataSnapshot.child("cover_image").getValue().toString();
+                            startActivity(new Intent(getApplicationContext(), FullViewImageActivity.class)
+                                    .putExtra("coverlink", link));
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });*/
+        pro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        cov.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
 
     private void init() {
         imageView = findViewById(R.id.profile_image);
+        addImage = findViewById(R.id.add_profile_image);
         name = findViewById(R.id.profile_name);
         bio = findViewById(R.id.profile_bio);
         bio_edit = findViewById(R.id.bio_edit);
+        coverImage = findViewById(R.id.cover_image);
+        add_cover = findViewById(R.id.add_cover);
+        pro = findViewById(R.id.button);
+        cov = findViewById(R.id.button2);
     }
 
     private void setData() {
@@ -162,9 +251,14 @@ public class SettingsActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMG_REQ && resultCode == RESULT_OK) {
-            Uri imageUri = data.getData();
+            imageUri = data.getData();
             CropImage.activity(imageUri)
                     .setAspectRatio(1, 1)
+                    .start(this);
+        } else if (requestCode == IMG_REQ2 && resultCode == RESULT_OK) {
+            coverUri = data.getData();
+            CropImage.activity(coverUri)
+                    .setAspectRatio(2, 1)
                     .start(this);
         }
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -215,12 +309,11 @@ public class SettingsActivity extends AppCompatActivity {
                 thumb_path.putBytes(thumb_data).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful())
-                        {
+                        if (task.isSuccessful()) {
                             thumb_path.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    thumLink=task.getResult().toString();
+                                    thumLink = task.getResult().toString();
                                 }
                             });
                         }
@@ -233,9 +326,8 @@ public class SettingsActivity extends AppCompatActivity {
                             filePath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    if (task.isSuccessful())
-                                    {
-                                         profileLink = task.getResult().toString();
+                                    if (task.isSuccessful()) {
+                                        profileLink = task.getResult().toString();
                                         DatabaseReference databaseReference1 = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
                                         Map map = new HashMap();
                                         map.put("profile_image", profileLink);
@@ -243,9 +335,8 @@ public class SettingsActivity extends AppCompatActivity {
                                         databaseReference1.updateChildren(map).addOnCompleteListener(new OnCompleteListener() {
                                             @Override
                                             public void onComplete(@NonNull Task task) {
-                                                if (task.isSuccessful())
-                                                {
-                                                    Toast.makeText(getApplicationContext(),"Uploaded!",Toast.LENGTH_LONG).show();
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(getApplicationContext(), "Uploaded!", Toast.LENGTH_LONG).show();
                                                     progressDialog.dismiss();
                                                 }
                                             }
@@ -257,13 +348,18 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }
                 });
-
-
-
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
         }
+
+
     }
 
+    private void AddCover() {
+        Intent getImage = new Intent();
+        getImage.setType("image/*");
+        getImage.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(getImage, "Select with.."), IMG_REQ2);
+    }
 }

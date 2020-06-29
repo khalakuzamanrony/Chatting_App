@@ -173,7 +173,7 @@ public class Blog2Activity extends AppCompatActivity {
         if (requestCode == IMG_REQ && resultCode == RESULT_OK && data != null && data.getData() != null) {
             mainImageUri = data.getData();
             CropImage.activity(mainImageUri)
-                    .setAspectRatio(1, 1)
+                    .setAspectRatio(2,1)
                     .start(this);
         }
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {

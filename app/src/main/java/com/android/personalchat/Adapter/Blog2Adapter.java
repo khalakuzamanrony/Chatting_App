@@ -2,6 +2,7 @@ package com.android.personalchat.Adapter;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.personalchat.FullViewImageActivity;
 import com.android.personalchat.GetTime;
 import com.android.personalchat.Models.Blog2Model;
 import com.android.personalchat.R;
@@ -61,7 +63,7 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             databaseReference = FirebaseDatabase.getInstance().getReference("Users");
-            myid=firebaseUser.getUid();
+            myid = firebaseUser.getUid();
             databaseReference.keepSynced(true);
         }
         if (viewType == NO_IMAGE) {
@@ -93,6 +95,21 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
                 @Override
                 public void onError(Exception e) {
                     Picasso.get().load(blog2Model.getImage()).placeholder(R.drawable.ic_launcher_background).into(holder.postImage);
+                }
+            });
+        }
+
+        //------ON CLICK-------//
+        if (!blog2Model.getImage().equals("noimage")) {
+            holder.postImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    context.startActivity(new Intent(context, FullViewImageActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            .putExtra("imagelink", blog2Model.getImage()));
+
+
                 }
             });
         }
@@ -158,7 +175,7 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
         holder.shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context,""+blog2Model.getPost_id(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "" + blog2Model.getPost_id(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -167,24 +184,23 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
             @Override
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(context, holder.more, Gravity.END);
-                if (blog2Model.getId().equals(myid)){
+                if (blog2Model.getId().equals(myid)) {
                     popupMenu.getMenu().add(Menu.NONE, 0, 0, "Edit");
                     popupMenu.getMenu().add(Menu.NONE, 1, 0, "Delete");
-                }else {
+                } else {
                     popupMenu.getMenu().add(Menu.NONE, 2, 0, "Save ");
                     popupMenu.getMenu().add(Menu.NONE, 3, 0, "Send Friend Request");
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        int id=item.getItemId();
-                      if (id==0)
-                      {
+                        int id = item.getItemId();
+                        if (id == 0) {
 
-                      } else if (id == 1) {
+                        } else if (id == 1) {
 
-                          DeletePost(blog2Model.getPost_id(),blog2Model.getImage());
-                      }
+                            DeletePost(blog2Model.getPost_id(), blog2Model.getImage());
+                        }
                         return false;
                     }
                 });
@@ -196,24 +212,22 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
     }
 
     private void DeletePost(final String post_id, String image) {
-        if (image.equals("noimage"))
-        {
+        if (image.equals("noimage")) {
 
-            progressDialog=new ProgressDialog(context);
+            progressDialog = new ProgressDialog(context);
             progressDialog.setTitle("Delete");
             progressDialog.setMessage("Deleteing...");
             progressDialog.show();
-            Query query=FirebaseDatabase.getInstance().getReference("Blogs").orderByChild("post_id").equalTo(post_id);
+            Query query = FirebaseDatabase.getInstance().getReference("Blogs").orderByChild("post_id").equalTo(post_id);
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren())
-                    {
+                    for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                         dataSnapshot1.getRef().removeValue();
 
                     }
 
-                    Toast.makeText(context,"Successfully Deleted",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Successfully Deleted", Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                 }
 
@@ -222,29 +236,27 @@ public class Blog2Adapter extends RecyclerView.Adapter<Blog2Adapter.ViewHolder> 
 
                 }
             });
-        }else {
-            progressDialog=new ProgressDialog(context);
+        } else {
+            progressDialog = new ProgressDialog(context);
             progressDialog.setTitle("Delete");
             progressDialog.setMessage("Deleteing...");
             progressDialog.show();
-            StorageReference storageReference= FirebaseStorage.getInstance().getReferenceFromUrl(image);
+            StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(image);
             //Deleting image
             storageReference.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful())
-                    {
-                        Query query=FirebaseDatabase.getInstance().getReference("Blogs").orderByChild("post_id").equalTo(post_id);
+                    if (task.isSuccessful()) {
+                        Query query = FirebaseDatabase.getInstance().getReference("Blogs").orderByChild("post_id").equalTo(post_id);
                         query.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren())
-                                {
+                                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                                     dataSnapshot1.getRef().removeValue();
 
                                 }
 
-                                Toast.makeText(context,"Successfully Deleted",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Successfully Deleted", Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
                             }
 
